@@ -1,0 +1,80 @@
+{
+  "dashboard": {
+    "projetos": 4,
+    "concluidas": 15,
+    "pendentes": 6
+  },
+  "atividades": [
+    {
+      "id": "1",
+      "title": "Atividade 1",
+      "status": "pendente",
+      "description": "Descrição da atividade 1",
+      "comentarios": [
+        "teste",
+        "testant"
+      ],
+      "concluidoPor": null
+    },
+    {
+      "id": "2",
+      "title": "Atividade 2",
+      "status": "finalizada",
+      "description": "Descrição da atividade 2",
+      "comentarios": [],
+      "concluidoPor": "admin"
+    },
+    {
+      "id": "3",
+      "title": "Atividade 3",
+      "status": "finalizada",
+      "description": "Descrição da atividade 3"
+    },
+    {
+      "id": "6a59",
+      "title": "Manutenção Lab",
+      "description": "Manutenção maquinas do laboratoio 1",
+      "status": "finalizada",
+      "comentarios": [
+        "admin: Fiz metade"
+      ],
+      "autor": "admin",
+      "concluidoPor": "admin"
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "password": "123",
+      "role": "admin"
+    },
+    {
+      "id": "2",
+      "username": "user",
+      "password": "123",
+      "role": "user"
+    }
+  ],
+  "projetos": [
+    {
+      "id": "1",
+      "titulo": "Ideia 1",
+      "descricao": "Descrição da ideia 1",
+      "autor": "user",
+      "likes": 0,
+      "comentarios": []
+    },
+    {
+      "id": "2",
+      "titulo": "Ideia 2",
+      "descricao": "Descrição da ideia 2",
+      "autor": "admin",
+      "likes": 2,
+      "comentarios": [
+        "Boa ideia!",
+        "Pode melhorar em X"
+      ]
+    }
+  ]
+}
