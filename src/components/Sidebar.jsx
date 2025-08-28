@@ -7,22 +7,41 @@ import {
   ArrowLeftOnRectangleIcon
 } from "@heroicons/react/24/outline";
 import { getCurrentUser, logout } from "../auth";
+import { useEffect, useState } from "react";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
 
 export default function Sidebar() {
   const user = getCurrentUser();
   const isAdmin = user?.role === "admin";
   const navigate = useNavigate();
+  const [darkMode, setDarkMode] = useState(false);
 
-  const handleLogout = () => {
-    logout(); // remove do localStorage
-    navigate("/"); // redireciona para tela de login
+  useEffect(() => {
+    const savedMode = localStorage.getItem("darkMode") === "true";
+    setDarkMode(savedMode);
+    if (savedMode) {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem("darkMode", newMode);
+    document.documentElement.classList.toggle("dark");
   };
 
-  // Se for admin, prefixo das rotas é "/admin"
+  const handleLogout = () => {
+    if (window.confirm("Tem certeza que deseja sair?")) {
+      logout();
+      navigate("/");
+    }
+  };
+
   const basePath = isAdmin ? "/admin" : "";
 
   return (
-    <div className="bg-gray-800 text-white w-64 min-h-screen p-6 flex flex-col">
+    <div className="bg-gray-800 dark:bg-gray-900 text-white w-64 min-h-screen p-6 flex flex-col transition-colors">
       <div className="mb-10">
         <h2 className="text-2xl font-bold">Ativix</h2>
         <p className="text-gray-400 text-sm">Gestão de Chamados</p>
@@ -42,7 +61,6 @@ export default function Sidebar() {
           <span>Dashboard</span>
         </Link>
 
-        {/* Só mostra para admin */}
         {isAdmin && (
           <>
             <Link to="/admin/cadastro-usuario" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
@@ -57,16 +75,23 @@ export default function Sidebar() {
         )}
       </nav>
       
-      {/* Rodapé com usuário + logout */}
-      <div className="mt-auto pt-6 border-t border-gray-700">
-        <div className="flex items-center gap-3 p-3 text-gray-400">
-          <UserCircleIcon className="h-5 w-5" />
-          <span>{user?.username}</span>
+      <div className="mt-auto pt-6 border-t border-gray-700 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-gray-400">
+            <UserCircleIcon className="h-5 w-5" />
+            <span>{user?.username}</span>
+          </div>
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition"
+          >
+            {darkMode ? <SunIcon className="h-5 w-5 text-yellow-400" /> : <MoonIcon className="h-5 w-5 text-gray-300" />}
+          </button>
         </div>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 p-3 w-full rounded-lg text-red-400 hover:text-red-300 hover:bg-gray-700 transition-all mt-3"
+          className="flex items-center gap-3 p-3 w-full rounded-lg text-red-400 hover:text-red-300 hover:bg-gray-700 transition-all"
         >
           <ArrowLeftOnRectangleIcon className="h-5 w-5" />
           <span>Sair</span>

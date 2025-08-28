@@ -1,18 +1,18 @@
-// src/pages/Atividades.jsx
 import { useState, useEffect } from "react";
 import AtividadeCard from "../components/AtividadeCard";
 import { addAtividade, getAtividades } from "../services/api";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaFilter } from "react-icons/fa";
 import { getCurrentUser } from "../auth";
+import { motion } from "framer-motion";
 
 const Atividades = () => {
   const [showForm, setShowForm] = useState(false);
   const [novaAtividade, setNovaAtividade] = useState({ title: "", description: "" });
   const [reload, setReload] = useState(false);
+  const user = getCurrentUser();
 
   const handleRegistrarAtividade = async (e) => {
     e.preventDefault();
-    const user = getCurrentUser();
     if (!user) {
       alert("Você precisa estar logado!");
       return;
@@ -33,63 +33,65 @@ const Atividades = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-200 p-8">
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen p-6 transition-colors">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-extrabold text-gray-800 dark:text-white tracking-tight">
-          Atividades
-        </h1>
-        <button
+        <h1 className="text-3xl font-extrabold text-gray-800 dark:text-gray-200">Atividades</h1>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-yellow-400 hover:to-orange-500 text-white font-semibold shadow-lg shadow-orange-500/40 transition-transform transform hover:scale-105 active:scale-95"
+          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-yellow-400 hover:to-orange-500 text-white font-semibold shadow-lg shadow-orange-500/40 transition-transform"
         >
           <FaPlus />
-          Registrar Atividade
-        </button>
+          Nova Atividade
+        </motion.button>
       </div>
 
-      {/* Modal de Registro */}
+      {/* Modal Nova Atividade */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
-          <form
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <motion.form
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
             onSubmit={handleRegistrarAtividade}
-            className="bg-gray-200 p-6 rounded-xl shadow-lg w-96 text-white"
+            className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4"
           >
-            <h2 className="text-xl font-bold mb-4">Nova Atividade</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">Registrar Nova Atividade</h2>
             <input
               type="text"
               placeholder="Título"
               value={novaAtividade.title}
               onChange={(e) => setNovaAtividade({ ...novaAtividade, title: e.target.value })}
-              className="w-full border rounded p-2 mb-3 bg-gray-700 text-white placeholder-gray-300"
+              className="w-full border rounded-lg p-3 text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
               required
             />
             <textarea
               placeholder="Descrição"
               value={novaAtividade.description}
               onChange={(e) => setNovaAtividade({ ...novaAtividade, description: e.target.value })}
-              className="w-full border rounded p-2 mb-3 bg-gray-700 text-white placeholder-gray-300"
-              required
+              className="w-full border rounded-lg p-3 text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 mt-4">
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 transition"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 transition"
               >
                 Salvar
               </button>
             </div>
-          </form>
+          </motion.form>
         </div>
       )}
 
-      {/* Seções com paginação */}
+      {/* Seções */}
       <Section key={`pendentes-${reload}`} title="Pendentes" status="pendente" />
       <Section key={`finalizadas-${reload}`} title="Finalizadas" status="finalizada" />
     </div>
@@ -97,15 +99,17 @@ const Atividades = () => {
 };
 
 const Section = ({ title, status }) => {
+  const user = getCurrentUser();
   const [page, setPage] = useState(1);
   const [order, setOrder] = useState("desc");
   const [search, setSearch] = useState("");
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
+  const [reload, setReload] = useState(false);
 
   const fetchData = async () => {
     try {
-      const res = await getAtividades(status, page, 5, order, search);
+      const res = await getAtividades(status, page, 5, order, search, user);
       setData(res.data);
       setTotal(res.total);
     } catch (error) {
@@ -115,16 +119,29 @@ const Section = ({ title, status }) => {
 
   useEffect(() => {
     fetchData();
-  }, [page, order, search, status]);
+  }, [page, order, search, reload, status]);
 
   const totalPages = Math.ceil(total / 5);
 
   return (
-    <div className="bg-gray-50 p-6 rounded-lg shadow-lg border border-gray-300">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="mb-10 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200">{title}</h2>
+        <span
+          className={`px-3 py-1 text-sm font-semibold rounded-full ${
+            status === "pendente" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"
+          }`}
+        >
+          {status.toUpperCase()}
+        </span>
+      </div>
 
-      <h2 className="text-2xl font-bold text-gray-700 mb-4">{title}</h2>
-
-      {/* Filtro e ordenação */}
+      {/* Filtro */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-3">
         <input
           type="text"
@@ -134,33 +151,30 @@ const Section = ({ title, status }) => {
             setSearch(e.target.value);
             setPage(1);
           }}
-          className="border rounded px-3 py-2 w-full md:w-1/2 bg-white text-gray-800 placeholder-gray-500"
+          className="border rounded-lg px-4 py-2 w-full md:w-1/2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
         />
-        <select
-          value={order}
-          onChange={(e) => setOrder(e.target.value)}
-          className="border rounded px-3 py-2 bg-white text-gray-800"
-        >
-          <option value="desc">Mais recentes</option>
-          <option value="asc">Mais antigos</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <FaFilter className="text-gray-500 dark:text-gray-300" />
+          <select
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            className="border rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          >
+            <option value="desc">Mais recentes</option>
+            <option value="asc">Mais antigos</option>
+          </select>
+        </div>
       </div>
 
+      {/* Lista */}
       {data.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {data.map((atividade) => (
               <AtividadeCard
                 key={atividade.id}
-                id={atividade.id}
-                title={atividade.title}
-                description={atividade.description}
-                status={atividade.status}
-                comentarios={atividade.comentarios || []}
-                autor={atividade.autor}
-                concluidoPor={atividade.concluidoPor}
-                assignedTo={atividade.assignedTo}
-                onUpdate={fetchData}
+                atividade={atividade}
+                onUpdate={() => setReload((prev) => !prev)}
               />
             ))}
           </div>
@@ -170,26 +184,26 @@ const Section = ({ title, status }) => {
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page === 1}
-              className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 transition disabled:opacity-50"
+              className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 transition disabled:opacity-50"
             >
               Anterior
             </button>
-            <span className="text-gray-700">
+            <span className="text-gray-700 dark:text-gray-200">
               Página {page} de {totalPages || 1}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page === totalPages || totalPages === 0}
-              className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 transition disabled:opacity-50"
+              className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 transition disabled:opacity-50"
             >
               Próxima
             </button>
           </div>
         </>
       ) : (
-        <p className="text-gray-500">Nenhuma atividade {title.toLowerCase()}.</p>
+        <p className="text-gray-500 dark:text-gray-400">Nenhuma atividade {title.toLowerCase()}.</p>
       )}
-    </div>
+    </motion.div>
   );
 };
 

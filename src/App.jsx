@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast"; // <- Import do Toaster
 import Login from "./pages/Login";
 import Dashboard from "./pages/DashBoard";
 import Projetos from "./pages/Projetos";
@@ -13,6 +14,9 @@ import UserLayout from "./pages/UserLayout"; // novo layout para usuário comum
 export default function App() {
   return (
     <div className="min-h-screen w-full">
+      {/* Toaster global */}
+      <Toaster position="top-right" reverseOrder={false} />
+
       <Routes>
         {/* Login */}
         <Route path="/" element={<Login />} />

@@ -1,6 +1,5 @@
 // src/services/api.js
 import axios from "axios";
-import { getCurrentUser } from "../auth";
 
 const BASE_URL = "http://localhost:5000";
 
@@ -9,15 +8,72 @@ const api = axios.create({
 });
 
 /**
- * Dashboard
+ * Dashboard (dinâmico com projetos e atividades por usuário)
  */
 export const getDashboardData = async () => {
-  const response = await api.get("/dashboard");
-  return response.data;
+  try {
+    const [atividadesRes, projetosRes, usersRes] = await Promise.all([
+      api.get("/atividades"),
+      api.get("/projetos"),
+      api.get("/users"),
+    ]);
+
+    const atividades = Array.isArray(atividadesRes.data) ? atividadesRes.data : [];
+    const projetos = Array.isArray(projetosRes.data) ? projetosRes.data : [];
+    const users = Array.isArray(usersRes.data) ? usersRes.data : [];
+
+    // Contagem de atividades por status
+    const concluidas = atividades.filter((a) => a.status === "finalizada").length;
+    const pendentes = atividades.filter((a) => a.status === "pendente").length;
+
+    // Contagem total de projetos
+    const totalProjetos = projetos.length;
+
+    // Projetos por usuário (com base no campo "autor")
+    const projetosPorUsuario = {};
+    projetos.forEach((p) => {
+      const autor = p.autor || "Desconhecido";
+      projetosPorUsuario[autor] = (projetosPorUsuario[autor] || 0) + 1;
+    });
+
+    // Atividades por usuário (com base no campo "assignedTo")
+    const atividadesPorUsuario = {};
+    atividades.forEach((a) => {
+      const user = a.assignedTo || "Não atribuído";
+      atividadesPorUsuario[user] = (atividadesPorUsuario[user] || 0) + 1;
+    });
+
+    // Garantir que todos os usuários apareçam no gráfico, mesmo com zero
+    users.forEach((u) => {
+      if (!(u.username in projetosPorUsuario)) {
+        projetosPorUsuario[u.username] = 0;
+      }
+      if (!(u.username in atividadesPorUsuario)) {
+        atividadesPorUsuario[u.username] = 0;
+      }
+    });
+
+    return {
+      concluidas,
+      pendentes,
+      projetos: totalProjetos,
+      projetosPorUsuario,
+      atividadesPorUsuario,
+    };
+  } catch (error) {
+    console.error("Erro ao carregar dashboard:", error);
+    return {
+      concluidas: 0,
+      pendentes: 0,
+      projetos: 0,
+      projetosPorUsuario: {},
+      atividadesPorUsuario: {},
+    };
+  }
 };
 
 /**
- * Login
+ * Login (fake)
  */
 export const loginUser = async (username, password) => {
   const response = await api.get(`/users?username=${username}&password=${password}`);
@@ -29,28 +85,20 @@ export const loginUser = async (username, password) => {
 };
 
 /**
- * Buscar atividades com filtro, ordenação e paginação no cliente
+ * Buscar atividades com paginação, ordenação, filtro e ocultar fixadas para outros usuários
  */
 export const getAtividades = async (
   status,
   page = 1,
   limit = 5,
   order = "desc",
-  search = ""
+  search = "",
+  currentUser = null
 ) => {
-  const user = getCurrentUser();
-
   const res = await api.get("/atividades", { params: { status } });
   let list = Array.isArray(res.data) ? res.data : [];
 
-  // Filtrar por assignedTo (somente admin vê todas)
-  if (user.role !== "admin") {
-    list = list.filter(
-      (item) => !item.assignedTo || item.assignedTo === user.username
-    );
-  }
-
-  // Filtro por título ou descrição (parcial)
+  // 🔍 Filtro por título ou descrição
   const term = search.trim().toLowerCase();
   if (term) {
     list = list.filter((item) => {
@@ -60,7 +108,12 @@ export const getAtividades = async (
     });
   }
 
-  // Ordenação
+  // 🔒 Ocultar fixadas de outros usuários (exceto admin)
+  if (currentUser && currentUser.role !== "admin") {
+    list = list.filter((item) => !item.assignedTo || item.assignedTo === currentUser.username);
+  }
+
+  // 📌 Ordenação
   const getKey = (it) => {
     if (it.createdAt) return { type: "num", v: Number(it.createdAt) };
     const n = Number(it.id);
@@ -79,7 +132,7 @@ export const getAtividades = async (
     return order === "asc" ? cmp : -cmp;
   });
 
-  // Paginação
+  // 📄 Paginação
   const total = list.length;
   const start = (page - 1) * limit;
   const end = start + limit;
@@ -93,7 +146,8 @@ export const getAtividades = async (
  */
 export const addAtividade = async (atividade) => {
   const payload = {
-    createdAt: Date.now(),
+    createdAt: new Date().toISOString(),  // data de criação ISO
+    completedAt: null,                    // só preenche ao finalizar
     ...atividade,
   };
   const res = await api.post("/atividades", payload);
@@ -104,12 +158,17 @@ export const addAtividade = async (atividade) => {
  * Atualizar atividade
  */
 export const updateAtividade = async (id, data) => {
+  // se está sendo marcada como finalizada, salva a hora da conclusão
+  if (data.status === "finalizada") {
+    data.completedAt = new Date().toISOString();
+  }
+
   const response = await api.patch(`/atividades/${id}`, data);
   return response.data;
 };
 
 /**
- * Adicionar comentário
+ * Adicionar comentário em atividade
  */
 export const addComentarioAtividade = async (id, comentario) => {
   const atividade = await api.get(`/atividades/${id}`);
@@ -119,41 +178,109 @@ export const addComentarioAtividade = async (id, comentario) => {
 };
 
 /**
- * Projetos
- */
-export const getProjetos = async () => {
-  const response = await api.get("/projetos");
-  return response.data;
-};
-
-export const addProjeto = async (projeto) => {
-  const response = await api.post("/projetos", projeto);
-  return response.data;
-};
-
-export const likeProjeto = async (id, likes) => {
-  const response = await api.patch(`/projetos/${id}`, { likes });
-  return response.data;
-};
-
-export const addComentario = async (id, comentario) => {
-  const projeto = await api.get(`/projetos/${id}`);
-  const novosComentarios = [...projeto.data.comentarios, comentario];
-  const response = await api.patch(`/projetos/${id}`, { comentarios: novosComentarios });
-  return response.data;
-};
-
-/**
- * Fixar atividade para usuário específico
+ * Atribuir atividade a um usuário (fixar)
  */
 export const assignAtividade = async (id, username) => {
   const response = await api.patch(`/atividades/${id}`, { assignedTo: username });
   return response.data;
 };
 
+/**
+ * Buscar todos os usuários
+ */
 export const getUsers = async () => {
   const response = await api.get("/users");
   return response.data;
 };
+
+/**
+ * Excluir atividade
+ */
+export const deleteAtividade = async (id) => {
+  const response = await api.delete(`/atividades/${id}`);
+  return response.data;
+};
+
+/**
+ * Excluir comentário em atividade
+ */
+export const deleteComentarioAtividade = async (id, index) => {
+  const atividade = await api.get(`/atividades/${id}`);
+  const comentarios = [...atividade.data.comentarios];
+  comentarios.splice(index, 1);
+  const response = await api.patch(`/atividades/${id}`, { comentarios });
+  return response.data;
+};
+
+/**
+ * Atualizar comentário em atividade
+ */
+export const updateComentarioAtividadeTexto = async (id, index, novoTexto) => {
+  const atividade = await api.get(`/atividades/${id}`);
+  const comentarios = [...atividade.data.comentarios];
+  if (comentarios[index]) {
+    comentarios[index].texto = novoTexto;
+  }
+  const response = await api.patch(`/atividades/${id}`, { comentarios });
+  return response.data;
+};
+
+// Concluídas por usuário
+export const getRelatorioConcluidasPorUsuario = async () => {
+  const res = await api.get("/atividades");
+  const atividades = res.data.filter((a) => a.status === "finalizada");
+  const porUsuario = {};
+  atividades.forEach((a) => {
+    const user = a.assignedTo || "Não atribuído";
+    if (!porUsuario[user]) porUsuario[user] = [];
+    porUsuario[user].push(a);
+  });
+  return porUsuario;
+};
+
+// Concluídas por dia
+export const getRelatorioConcluidasPorDia = async () => {
+  const res = await api.get("/atividades");
+  const atividades = res.data.filter((a) => a.status === "finalizada");
+  const porDia = {};
+  atividades.forEach((a) => {
+    const user = a.assignedTo || "Não atribuído";
+    const dia = new Date(a.createdAt).toLocaleDateString("pt-BR");
+    if (!porDia[user]) porDia[user] = {};
+    if (!porDia[user][dia]) porDia[user][dia] = [];
+    porDia[user][dia].push(a);
+  });
+  return porDia;
+};
+
+// Concluídas por semana
+export const getRelatorioConcluidasPorSemana = async () => {
+  const res = await api.get("/atividades");
+  const atividades = res.data.filter((a) => a.status === "finalizada");
+  const porSemana = {};
+  atividades.forEach((a) => {
+    const user = a.assignedTo || "Não atribuído";
+    const d = new Date(a.createdAt);
+    const semana = `${d.getFullYear()}-W${Math.ceil(d.getDate() / 7)}`;
+    if (!porSemana[user]) porSemana[user] = {};
+    if (!porSemana[user][semana]) porSemana[user][semana] = [];
+    porSemana[user][semana].push(a);
+  });
+  return porSemana;
+};
+
+// Fixadas por usuário
+export const getRelatorioFixadasPorUsuario = async () => {
+  const res = await api.get("/atividades");
+  const atividades = res.data.filter((a) => a.assignedTo);
+  const fixadas = {};
+  atividades.forEach((a) => {
+    const user = a.assignedTo;
+    if (!fixadas[user]) fixadas[user] = [];
+    fixadas[user].push(a);
+  });
+  return fixadas;
+};
+
 
 export default api;

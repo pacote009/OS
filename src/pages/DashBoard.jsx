@@ -5,6 +5,7 @@ import { getDashboardData } from "../services/api";
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid
 } from "recharts";
+import { motion } from "framer-motion";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -25,7 +26,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  if (loading) return <p className="text-gray-500">Carregando...</p>;
+  if (loading) return <p className="text-gray-500 dark:text-gray-300">Carregando...</p>;
   if (!stats) return <p className="text-red-500">Erro ao carregar dados.</p>;
 
   // Dados para gráfico de pizza
@@ -45,30 +46,54 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-      <p className="text-gray-600">Resumo atualizado das suas atividades e projetos.</p>
+    <div className="space-y-8 p-6 bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors">
+      <motion.h1
+        initial={{ opacity: 0, y: -15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-3xl font-bold text-gray-800 dark:text-white"
+      >
+        Dashboard
+      </motion.h1>
+      <p className="text-gray-600 dark:text-gray-400">Resumo atualizado das suas atividades e projetos.</p>
 
       {/* Cards clicáveis */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card onClick={() => navigate("/projetos")}
-          icon={<ClipboardDocumentListIcon className="h-8 w-8" />} color="indigo"
-          title="Projetos Ativos" value={stats.projetos} />
+        <MotionCard
+          onClick={() => navigate("/projetos")}
+          icon={<ClipboardDocumentListIcon className="h-8 w-8" />}
+          color="indigo"
+          title="Projetos Ativos"
+          value={stats.projetos}
+        />
 
-        <Card onClick={() => navigate("/atividades?status=concluidas")}
-          icon={<CheckCircleIcon className="h-8 w-8" />} color="green"
-          title="Atividades Concluídas" value={stats.concluidas} />
+        <MotionCard
+          onClick={() => navigate("/atividades?status=concluidas")}
+          icon={<CheckCircleIcon className="h-8 w-8" />}
+          color="green"
+          title="Atividades Concluídas"
+          value={stats.concluidas}
+        />
 
-        <Card onClick={() => navigate("/atividades?status=pendentes")}
-          icon={<ClockIcon className="h-8 w-8" />} color="yellow"
-          title="Pendentes" value={stats.pendentes} />
+        <MotionCard
+          onClick={() => navigate("/atividades?status=pendentes")}
+          icon={<ClockIcon className="h-8 w-8" />}
+          color="yellow"
+          title="Pendentes"
+          value={stats.pendentes}
+        />
       </div>
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Gráfico Pizza */}
-        <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
-          <h2 className="text-lg font-semibold mb-4">Distribuição</h2>
+        <motion.div
+          className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 border border-gray-200 dark:border-gray-700"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Distribuição</h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={90}>
@@ -80,29 +105,34 @@ const Dashboard = () => {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </motion.div>
 
         {/* Gráfico Linha */}
-        <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
-          <h2 className="text-lg font-semibold mb-4">Progresso Semanal</h2>
+        <motion.div
+          className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 border border-gray-200 dark:border-gray-700"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Progresso Semanal</h2>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={lineData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="semana" />
-              <YAxis />
+              <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+              <XAxis dataKey="semana" stroke="#888" />
+              <YAxis stroke="#888" />
               <Tooltip />
               <Legend />
               <Line type="monotone" dataKey="concluidas" stroke="#22c55e" strokeWidth={2} />
               <Line type="monotone" dataKey="pendentes" stroke="#eab308" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
 };
 
-const Card = ({ icon, color, title, value, onClick }) => {
+const MotionCard = ({ icon, color, title, value, onClick }) => {
   const colors = {
     indigo: "bg-indigo-100 text-indigo-600",
     green: "bg-green-100 text-green-600",
@@ -110,16 +140,18 @@ const Card = ({ icon, color, title, value, onClick }) => {
   };
 
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className="bg-white shadow-lg rounded-2xl p-6 flex items-center gap-4 border border-gray-100 hover:scale-105 transition-transform"
+      className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 flex items-center gap-4 border border-gray-200 dark:border-gray-700 transition-colors"
     >
       <div className={`${colors[color]} p-3 rounded-full`}>{icon}</div>
       <div className="text-left">
-        <p className="text-gray-500">{title}</p>
-        <h2 className="text-2xl font-bold">{value}</h2>
+        <p className="text-gray-500 dark:text-gray-400">{title}</p>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{value}</h2>
       </div>
-    </button>
+    </motion.button>
   );
 };
 

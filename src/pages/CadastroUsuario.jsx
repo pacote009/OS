@@ -38,8 +38,8 @@ const CadastroUsuario = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-tr from-indigo-900 via-gray-900 to-black px-4 sm:px-6">
-      <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl w-full max-w-md p-8 sm:p-10 border border-white/20">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-tr from-indigo-900 via-gray-900 to-black px-4">
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl w-full max-w-lg p-10 border border-white/20">
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white text-center mb-6 tracking-wide">
           Cadastro de Usuário
         </h2>

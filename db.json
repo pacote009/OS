@@ -6,281 +6,61 @@
   },
   "atividades": [
     {
-      "id": "1",
-      "title": "Atividade 1",
-      "status": "finalizada",
-      "description": "Descrição da atividade 1",
-      "comentarios": [
-        "teste",
-        "testant"
-      ],
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "2",
-      "title": "Atividade 2",
-      "status": "finalizada",
-      "description": "Descrição da atividade 2",
-      "comentarios": [],
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "3",
-      "title": "Atividade 3",
-      "status": "finalizada",
-      "description": "Descrição da atividade 3"
-    },
-    {
-      "id": "6a59",
-      "title": "Manutenção Lab",
-      "description": "Manutenção maquinas do laboratoio 1",
+      "id": "648e",
+      "createdAt": "2025-08-28T22:49:01.189Z",
+      "completedAt": "2025-08-28T23:05:48.074Z",
+      "title": "Correção e manutenção dos pontos de rede academicos",
+      "description": "Verificação e correção de todos os pontos de rede academicos dos laboratórios 1 e 2",
       "status": "finalizada",
       "comentarios": [
-        "admin: Fiz metade"
-      ],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "1916",
-      "title": "TESTE",
-      "description": "`1",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "07c2",
-      "title": "TESTE",
-      "description": "2",
-      "status": "finalizada",
-      "comentarios": [
-        "admin: Teste",
-        "admin: teste"
-      ],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "a352",
-      "title": "TESTE",
-      "description": "3",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "53cb",
-      "title": "TESTE",
-      "description": "4",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "8624",
-      "title": "TESTE",
-      "description": "5",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "d439",
-      "title": "TESTE",
-      "description": "2",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "c47a",
-      "title": "teste",
-      "description": "222",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "9d31",
-      "title": "teste",
-      "description": "231",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "67a2",
-      "title": "teste",
-      "description": "451",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "cf87",
-      "title": "teste7",
-      "description": "1234",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "7ba5",
-      "title": "testamdo",
-      "description": "123",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "7591",
-      "title": "1231231312",
-      "description": "412414",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "ba2e",
-      "title": "123456",
-      "description": "vit",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "eae4",
-      "title": "shakira",
-      "description": "123",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "4cd9",
-      "title": "VITOR",
-      "description": "VITOR",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "864c",
-      "title": "1",
-      "description": "1",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "9cb3",
-      "title": "2",
-      "description": "2",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "874d",
-      "title": "3",
-      "description": "3",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "b8fc",
-      "title": "4",
-      "description": "4",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "87e2",
-      "title": "5",
-      "description": "5",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "874b",
-      "title": "6",
-      "description": "6",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "3a31",
-      "title": "mello",
-      "description": "mello",
-      "status": "finalizada",
-      "comentarios": [],
-      "autor": "admin",
-      "concluidoPor": "admin"
-    },
-    {
-      "id": "bedc",
-      "title": "7",
-      "description": "7",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "f863",
-      "title": "8",
-      "description": "8",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "864c",
-      "title": "1",
-      "description": "1",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin",
-      "assignedTo": null
-    },
-    {
-      "id": "e555",
-      "createdAt": 1755884109869,
-      "title": "Manutenção",
-      "description": "LAB2",
-      "status": "pendente",
-      "comentarios": [],
-      "autor": "admin"
-    },
-    {
-      "id": "c5e4",
-      "createdAt": 1755884738183,
-      "title": "Manutenção de cameras ",
-      "description": "Corrigir camera falhando setor TI",
-      "status": "finalizada",
-      "comentarios": [
-        "admin: Sala 1 ok"
+        {
+          "autor": "admin",
+          "texto": "Alguns pontos estão falhando, faltando pares no cabo de rede, solicitar nova passagem de cabo"
+        }
       ],
       "autor": "admin",
       "assignedTo": "user",
+      "concluidoPor": "admin"
+    },
+    {
+      "id": "e345",
+      "createdAt": "2025-08-28T22:50:28.225Z",
+      "completedAt": "2025-08-28T23:05:47.277Z",
+      "title": "Manutenção de cameras",
+      "description": "Verificar todas as cameras que não estão funcionando, identificar os problemas e buscar a solução.",
+      "status": "finalizada",
+      "comentarios": [
+        {
+          "autor": "admin",
+          "texto": "Cabos que estiverem rompidos, solicitar a manutenção uma nova passagem de cabo."
+        }
+      ],
+      "autor": "admin",
+      "assignedTo": "admin",
+      "concluidoPor": "admin"
+    },
+    {
+      "id": "1e12",
+      "createdAt": "2025-08-28T22:51:25.115Z",
+      "completedAt": "2025-08-28T22:51:29.575Z",
+      "title": "Telefonia",
+      "description": "Fazer alterações solicitadas nos ramais do PABX e salvar um novo backup.",
+      "status": "finalizada",
+      "comentarios": [],
+      "autor": "admin",
+      "assignedTo": "user",
+      "concluidoPor": "admin"
+    },
+    {
+      "id": "de87",
+      "createdAt": "2025-08-28T22:52:37.371Z",
+      "completedAt": "2025-08-28T22:52:40.981Z",
+      "title": "Manutenção PC Coordenação",
+      "description": "Problema na fonte",
+      "status": "finalizada",
+      "comentarios": [],
+      "autor": "admin",
+      "assignedTo": "admin",
       "concluidoPor": "admin"
     }
   ],
@@ -300,23 +80,12 @@
   ],
   "projetos": [
     {
-      "id": "1",
-      "titulo": "Ideia 1",
-      "descricao": "Descrição da ideia 1",
-      "autor": "user",
+      "id": "99de",
+      "titulo": "Melhoria do sistema de presença dos alunos",
+      "descricao": "Construir e adaptar um sistema de reconhecimento facial para confirmar a presença dos alunos",
+      "autor": "admin",
       "likes": 0,
       "comentarios": []
-    },
-    {
-      "id": "2",
-      "titulo": "Ideia 2",
-      "descricao": "Descrição da ideia 2",
-      "autor": "admin",
-      "likes": 2,
-      "comentarios": [
-        "Boa ideia!",
-        "Pode melhorar em X"
-      ]
     }
   ]
 }

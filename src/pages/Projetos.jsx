@@ -3,6 +3,7 @@ import ProjetoCard from "../components/ProjetoCard";
 import { FaLightbulb } from "react-icons/fa";
 import api from "../services/api";
 import { getCurrentUser } from "../auth";
+import { motion } from "framer-motion";
 
 const Projetos = () => {
   const [projetos, setProjetos] = useState([]);
@@ -32,7 +33,7 @@ const Projetos = () => {
       descricao,
       autor: user.username,
       likes: 0,
-      comentarios: []
+      comentarios: [],
     };
 
     try {
@@ -40,16 +41,16 @@ const Projetos = () => {
       setTitulo("");
       setDescricao("");
       setShowForm(false);
-      fetchProjetos(); // recarrega lista
+      fetchProjetos();
     } catch (err) {
       console.error("Erro ao salvar projeto:", err);
     }
   };
 
   return (
-    <div>
+    <div className="p-6 min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-extrabold text-gray-800 dark:text-white tracking-tight">
+        <h1 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 tracking-tight">
           Projetos
         </h1>
         <button
@@ -62,35 +63,38 @@ const Projetos = () => {
       </div>
 
       {showForm && (
-        <form
+        <motion.form
           onSubmit={handleNovaIdeia}
-          className="bg-white p-6 rounded-lg shadow-md mb-6 space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-6 space-y-4"
         >
           <input
             type="text"
             placeholder="Título do projeto"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            className="w-full border rounded-lg p-2"
+            className="w-full border rounded-lg p-3 text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
             required
           />
           <textarea
             placeholder="Descrição da ideia"
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
-            className="w-full border rounded-lg p-2"
+            className="w-full border rounded-lg p-3 text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
             required
           />
           <button
             type="submit"
-            className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
           >
             Salvar
           </button>
-        </form>
+        </motion.form>
       )}
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projetos.map((proj) => (
           <ProjetoCard key={proj.id} projeto={proj} onUpdate={fetchProjetos} />
         ))}

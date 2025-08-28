@@ -1,162 +1,213 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import {
+  updateAtividade,
+  deleteAtividade,
+  deleteComentarioAtividade,
+  updateComentarioAtividadeTexto,
+} from "../services/api";
 import { getCurrentUser } from "../auth";
-import api, { assignAtividade } from "../services/api";
+import ModalFixar from "./ModalFixar";
+import ModalAlterarUsuario from "./ModalAlterarUsuario";
+import { FaTrash, FaEdit, FaCheck, FaUserEdit, FaThumbtack } from "react-icons/fa";
+import { motion } from "framer-motion";
 
-const AtividadeCard = ({ id, title, description, status, comentarios = [], concluidoPor, assignedTo, onUpdate }) => {
-  const [novoComentario, setNovoComentario] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [usuarios, setUsuarios] = useState([]);
+const AtividadeCard = ({ atividade, onUpdate }) => {
   const user = getCurrentUser();
-
-  // Buscar lista de usuários para o modal
-  useEffect(() => {
-    if (showModal) {
-      const fetchUsers = async () => {
-        try {
-          const res = await api.get("/users");
-          setUsuarios(res.data);
-        } catch (error) {
-          console.error("Erro ao buscar usuários:", error);
-        }
-      };
-      fetchUsers();
-    }
-  }, [showModal]);
+  const [showFixarModal, setShowFixarModal] = useState(false);
+  const [showAlterarModal, setShowAlterarModal] = useState(false);
+  const [comentario, setComentario] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
+  const [editText, setEditText] = useState("");
 
   const handleConcluir = async () => {
-    try {
-      await api.patch(`/atividades/${id}`, {
-        status: "finalizada",
-        concluidoPor: user?.username || "desconhecido",
-      });
-      if (onUpdate) onUpdate();
-    } catch (error) {
-      console.error("Erro ao concluir atividade:", error);
+    await updateAtividade(atividade.id, {
+      status: "finalizada",
+      concluidoPor: user.username,
+    });
+    onUpdate();
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("Tem certeza que deseja excluir esta atividade?")) {
+      await deleteAtividade(atividade.id);
+      onUpdate();
     }
   };
 
   const handleAddComentario = async () => {
-    if (!novoComentario.trim()) return;
-    try {
-      const comentarioFormatado = `${user?.username || "Anônimo"}: ${novoComentario}`;
-      const novosComentarios = [...comentarios, comentarioFormatado];
-      await api.patch(`/atividades/${id}`, { comentarios: novosComentarios });
-      setNovoComentario("");
-      if (onUpdate) onUpdate();
-    } catch (error) {
-      console.error("Erro ao adicionar comentário:", error);
-    }
+    if (comentario.trim() === "") return;
+    const novosComentarios = [
+      ...atividade.comentarios,
+      { autor: user.username, texto: comentario },
+    ];
+    await updateAtividade(atividade.id, { comentarios: novosComentarios });
+    setComentario("");
+    onUpdate();
   };
 
-  const handleFixar = async (username) => {
-    try {
-      await assignAtividade(id, username);
-      setShowModal(false);
-      if (onUpdate) onUpdate(); // Atualiza lista
-    } catch (error) {
-      console.error("Erro ao fixar atividade:", error);
-    }
+  const handleDeleteComentario = async (index) => {
+    await deleteComentarioAtividade(atividade.id, index);
+    onUpdate();
+  };
+
+  const handleUpdateComentario = async (index) => {
+    if (editText.trim() === "") return;
+    await updateComentarioAtividadeTexto(atividade.id, index, editText);
+    setEditIndex(null);
+    setEditText("");
+    onUpdate();
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow mb-4 border border-gray-200">
-      <h2 className="font-bold text-lg">{title}</h2>
-      <p className="text-gray-600">{description}</p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col justify-between hover:shadow-2xl transition-all"
+    >
+      {/* Cabeçalho */}
+      <div className="mb-4">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">{atividade.title}</h3>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">{atividade.description}</p>
 
-      {concluidoPor && (
-        <p className="text-sm text-gray-500 mt-1">
-          ✅ Concluído por: <span className="font-semibold">{concluidoPor}</span>
-        </p>
-      )}
-
-      {assignedTo && (
-        <p className="text-sm text-blue-500 mt-1">
-          📌 Fixado para: <span className="font-semibold">{assignedTo}</span>
-        </p>
-      )}
-
-      {/* Comentários */}
-      <div className="mt-3">
-        <h3 className="font-semibold text-gray-700">Comentários:</h3>
-        {comentarios.length > 0 ? (
-          <ul className="list-disc list-inside text-sm text-gray-600">
-            {comentarios.map((c, i) => (
-              <li key={i}>{c}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-400 text-sm">Nenhum comentário.</p>
+        {atividade.assignedTo && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            📌 Fixado para: <strong>{atividade.assignedTo}</strong>
+          </p>
         )}
-      </div>
 
-      {/* Adicionar comentário */}
-      <div className="mt-3 flex gap-2">
-        <input
-          type="text"
-          value={novoComentario}
-          onChange={(e) => setNovoComentario(e.target.value)}
-          placeholder="Escreva um comentário..."
-          className="flex-1 px-2 py-1 border rounded bg-gray-700 text-white placeholder-gray-300"
-        />
-        <button
-          onClick={handleAddComentario}
-          className="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded"
-        >
-          Enviar
-        </button>
+        {atividade.status === "finalizada" && atividade.concluidoPor && (
+          <p className="text-green-600 dark:text-green-400 mt-2 text-sm">
+            ✅ Concluído por: <strong>{atividade.concluidoPor}</strong>
+          </p>
+        )}
       </div>
 
       {/* Botões */}
-      <div className="mt-3 flex gap-2">
-        {status !== "finalizada" && (
+      <div className="flex flex-wrap gap-2 mb-4">
+        {atividade.status === "pendente" && (
           <button
             onClick={handleConcluir}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
           >
-            Concluir
+            <FaCheck /> Concluir
           </button>
         )}
 
-        {/* Botão Fixar (somente admin e atividade pendente) */}
-        {user?.role === "admin" && status === "pendente" && (
+        {user.role === "admin" && atividade.status === "pendente" && (
           <button
-            onClick={() => setShowModal(true)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+            onClick={() => setShowFixarModal(true)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
           >
-            Fixar
+            <FaThumbtack /> Fixar
+          </button>
+        )}
+
+        {user.role === "admin" && atividade.assignedTo && (
+          <button
+            onClick={() => setShowAlterarModal(true)}
+            className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition"
+          >
+            <FaUserEdit /> Alterar Usuário
+          </button>
+        )}
+
+        {user.role === "admin" && (
+          <button
+            onClick={handleDelete}
+            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            <FaTrash /> Excluir
           </button>
         )}
       </div>
 
-      {/* Modal de escolha de usuário */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Fixar Atividade</h2>
-            <p className="mb-3 text-gray-600">Escolha um usuário:</p>
-            <div className="max-h-60 overflow-y-auto">
-              {usuarios.map((u) => (
-                <button
-                  key={u.id}
-                  onClick={() => handleFixar(u.username)}
-                  className="w-full text-left px-4 py-2 rounded hover:bg-gray-100 border-b"
-                >
-                  {u.username} ({u.role})
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 flex justify-end gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Modais */}
+      {showFixarModal && (
+        <ModalFixar atividade={atividade} onClose={() => setShowFixarModal(false)} onUpdate={onUpdate} />
       )}
-    </div>
+
+      {showAlterarModal && (
+        <ModalAlterarUsuario atividade={atividade} onClose={() => setShowAlterarModal(false)} onUpdate={onUpdate} />
+      )}
+
+      {/* Comentários */}
+      <div className="mt-6">
+        <h4 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Comentários:</h4>
+        <div className="space-y-3">
+          {(atividade.comentarios && atividade.comentarios.length > 0) ? (
+            atividade.comentarios.map((coment, index) => (
+              <div
+                key={index}
+                className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 flex justify-between items-center shadow-sm"
+              >
+                {editIndex === index ? (
+                  <div className="flex w-full gap-2">
+                    <input
+                      type="text"
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      className="border rounded-lg px-3 py-2 flex-1 focus:outline-none bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                    />
+                    <button
+                      onClick={() => handleUpdateComentario(index)}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                    >
+                      Salvar
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      <strong>{coment.autor}:</strong> {coment.texto}
+                    </span>
+                    <div className="flex gap-3">
+                      {coment.autor === user.username && (
+                        <button
+                          onClick={() => {
+                            setEditIndex(index);
+                            setEditText(coment.texto);
+                          }}
+                          className="text-blue-500 hover:underline"
+                        >
+                          <FaEdit />
+                        </button>
+                      )}
+                      {(coment.autor === user.username || user.role === "admin") && (
+                        <button
+                          onClick={() => handleDeleteComentario(index)}
+                          className="text-red-500 hover:underline"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400">Nenhum comentário ainda.</p>
+          )}
+        </div>
+
+        <div className="flex gap-3 mt-4">
+          <input
+            type="text"
+            placeholder="Adicionar comentário..."
+            value={comentario}
+            onChange={(e) => setComentario(e.target.value)}
+            className="w-full border rounded-lg p-2 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 placeholder-gray-400"
+          />
+          <button
+            onClick={handleAddComentario}
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Adicionar
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
