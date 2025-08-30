@@ -254,20 +254,39 @@ export const getRelatorioConcluidasPorDia = async () => {
 };
 
 // Concluídas por semana
+// Todas por semana (sem filtrar antes)
 export const getRelatorioConcluidasPorSemana = async () => {
   const res = await api.get("/atividades");
-  const atividades = res.data.filter((a) => a.status === "finalizada");
+  const atividades = res.data; // ✅ pega todas
+
   const porSemana = {};
   atividades.forEach((a) => {
     const user = a.assignedTo || "Não atribuído";
     const d = new Date(a.createdAt);
-    const semana = `${d.getFullYear()}-W${Math.ceil(d.getDate() / 7)}`;
-    if (!porSemana[user]) porSemana[user] = {};
-    if (!porSemana[user][semana]) porSemana[user][semana] = [];
-    porSemana[user][semana].push(a);
+
+// 🔹 Encontrar a segunda-feira da semana
+const primeiroDiaSemana = new Date(d);
+primeiroDiaSemana.setDate(d.getDate() - d.getDay() + 1); // segunda-feira
+
+// 🔹 Último dia da semana (domingo)
+const ultimoDiaSemana = new Date(primeiroDiaSemana);
+ultimoDiaSemana.setDate(primeiroDiaSemana.getDate() + 6);
+
+// 🔹 Formatar intervalo (21/08 - 27/08)
+const formatar = (data) =>
+  data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+
+const semana = `${formatar(primeiroDiaSemana)} - ${formatar(ultimoDiaSemana)}`;
+
+if (!porSemana[user]) porSemana[user] = {};
+if (!porSemana[user][semana]) porSemana[user][semana] = [];
+porSemana[user][semana].push(a);
+
   });
+
   return porSemana;
 };
+
 
 // Fixadas por usuário
 export const getRelatorioFixadasPorUsuario = async () => {

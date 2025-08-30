@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ClipboardDocumentListIcon, CheckCircleIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-import { getDashboardData } from "../services/api";
+import { getDashboardData, getRelatorioConcluidasPorSemana } from "../services/api";
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid
 } from "recharts";
@@ -9,21 +9,81 @@ import { motion } from "framer-motion";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
+  const [lineData, setLineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchData() {
       try {
         const data = await getDashboardData();
-        setStats(data);
+        if (isMounted) setStats(data);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
+
+    async function fetchLineData() {
+  try {
+    const result = await getRelatorioConcluidasPorSemana();
+    console.log("📊 Dados recebidos do backend:", result);
+
+    if (isMounted) {
+      const parsed = {};
+
+      // percorre usuários
+      Object.values(result).forEach(userData => {
+        // percorre semanas
+        Object.entries(userData).forEach(([semana, atividades]) => {
+          if (!parsed[semana]) {
+            parsed[semana] = { semana, concluidas: 0, pendentes: 0 };
+          }
+
+          atividades.forEach(a => {
+  const status = a.status?.toLowerCase();
+
+  if (status === "finalizada") {
+    parsed[semana].concluidas += 1;
+  } else if (status === "pendente" || status === "pendentes") {
+    parsed[semana].pendentes += 1;
+  }
+});
+
+        });
+      });
+      // transforma objeto em array e ordena por data da semana
+const sorted = Object.values(parsed).sort((a, b) => {
+  const [diaA] = a.semana.split(" - ");
+  const [diaB] = b.semana.split(" - ");
+  const [dA, mA] = diaA.split("/").map(Number);
+  const [dB, mB] = diaB.split("/").map(Number);
+  return new Date(2025, mA - 1, dA) - new Date(2025, mB - 1, dB);
+});
+
+setLineData(sorted);
+    }
+  } catch (err) {
+    console.error("Erro ao buscar progresso semanal:", err);
+  }
+}
+
     fetchData();
+    fetchLineData();
+
+    // 🔄 Auto refresh a cada 30s
+    const interval = setInterval(() => {
+      fetchData();
+      fetchLineData();
+    }, 30000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   if (loading) return <p className="text-gray-500 dark:text-gray-300">Carregando...</p>;
@@ -36,14 +96,6 @@ const Dashboard = () => {
     { name: "Projetos", value: stats.projetos },
   ];
   const COLORS = ["#22c55e", "#eab308", "#6366f1"];
-
-  // Dados exemplo para gráfico de linha
-  const lineData = [
-    { semana: "01-07", concluidas: 2, pendentes: 4 },
-    { semana: "08-14", concluidas: 5, pendentes: 2 },
-    { semana: "15-21", concluidas: 3, pendentes: 6 },
-    { semana: "22-28", concluidas: 7, pendentes: 1 },
-  ];
 
   return (
     <div className="space-y-8 p-6 bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors">

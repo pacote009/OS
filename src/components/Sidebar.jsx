@@ -41,7 +41,7 @@ export default function Sidebar() {
   const basePath = isAdmin ? "/admin" : "";
 
   return (
-    <div className="bg-gray-800 dark:bg-gray-900 text-white w-64 min-h-screen p-6 flex flex-col transition-colors">
+    <div className="fixed top-0 left-0 h-screen w-64 bg-gray-800 dark:bg-gray-900 text-white p-6 flex flex-col transition-colors z-50">
       <div className="mb-10">
         <h2 className="text-2xl font-bold">Ativix</h2>
         <p className="text-gray-400 text-sm">Gestão de Chamados</p>
