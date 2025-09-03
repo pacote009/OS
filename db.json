@@ -82,7 +82,8 @@
       "description": "TESTANDO AP",
       "status": "pendente",
       "comentarios": [],
-      "autor": "admin"
+      "autor": "admin",
+      "assignedTo": "user"
     }
   ],
   "users": [
@@ -105,8 +106,11 @@
       "titulo": "Melhoria do sistema de presença dos alunos",
       "descricao": "Construir e adaptar um sistema de reconhecimento facial para confirmar a presença dos alunos",
       "autor": "admin",
-      "likes": 0,
-      "comentarios": []
+      "likes": 1,
+      "comentarios": [],
+      "likedBy": [
+        "admin"
+      ]
     }
   ]
 }

@@ -10,7 +10,8 @@ import { getCurrentUser, logout } from "../auth";
 import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }) {
+
   const user = getCurrentUser();
   const isAdmin = user?.role === "admin";
   const navigate = useNavigate();
@@ -41,22 +42,24 @@ export default function Sidebar() {
   const basePath = isAdmin ? "/admin" : "";
 
   return (
-    <div className="fixed top-0 left-0 h-screen w-64 bg-gray-800 dark:bg-gray-900 text-white p-6 flex flex-col transition-colors z-50">
+    <div className="flex flex-col justify-between min-h-full w-64 bg-gray-800 dark:bg-gray-900 text-white p-6 transition-colors">
+
+
       <div className="mb-10">
         <h2 className="text-2xl font-bold">Ativix</h2>
         <p className="text-gray-400 text-sm">Gestão de Chamados</p>
       </div>
       
       <nav className="space-y-2 flex-1">
-        <Link to={`${basePath}/projetos`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
+        <Link to={`${basePath}/projetos`} onClick={() => onClose && onClose()} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
           <ClipboardDocumentListIcon className="h-5 w-5" /> 
           <span>Projetos</span>
         </Link>
-        <Link to={`${basePath}/atividades`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
+        <Link to={`${basePath}/atividades`} onClick={() => onClose && onClose()} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
           <HomeIcon className="h-5 w-5" /> 
           <span>Atividades</span>
         </Link>
-        <Link to={`${basePath}/dashboard`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
+        <Link to={`${basePath}/dashboard`} onClick={() => onClose && onClose()} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
           <ChartBarIcon className="h-5 w-5" /> 
           <span>Dashboard</span>
         </Link>
