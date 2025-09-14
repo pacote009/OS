@@ -16,6 +16,7 @@ Permite cadastro de usuários, registro de serviços, acompanhamento de status e
 
 ## 📂 Estrutura de Pastas
 OS/
+
 ├── public/ # Arquivos estáticos
 
 ├── src/ # Código fonte principal
