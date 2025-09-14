@@ -17,16 +17,27 @@ Permite cadastro de usuários, registro de serviços, acompanhamento de status e
 ## 📂 Estrutura de Pastas
 OS/
 ├── public/ # Arquivos estáticos
+
 ├── src/ # Código fonte principal
+
 │ ├── assets/ # Imagens, ícones, fontes
+
 │ ├── components/ # Componentes reutilizáveis
+
 │ ├── pages/ # Páginas (rotas principais)
+
 │ ├── services/ # Comunicação com APIs / backend
+
 │ ├── hooks/ # Hooks customizados
+
 │ ├── utils/ # Funções auxiliares
+
 │ └── App.jsx # Componente raiz
+
 ├── db.json # Banco de dados fake (JSON Server)
+
 ├── package.json
+
 └── vite.config.js
 
 
