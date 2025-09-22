@@ -1,6 +1,7 @@
+// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { ClipboardDocumentListIcon, CheckCircleIcon, ClockIcon } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getDashboardData, getRelatorioConcluidasPorSemana } from "../services/api";
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid
@@ -8,88 +9,99 @@ import {
 import { motion } from "framer-motion";
 
 const Dashboard = () => {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({ concluidas: 0, pendentes: 0, projetos: 0 });
   const [lineData, setLineData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
+  const location = useLocation(); // para reagir a mudanças de rota
 
   useEffect(() => {
     let isMounted = true;
 
-    async function fetchData() {
+    const fetchDashboard = async () => {
+      setLoading(true);
+      setErrorMsg("");
       try {
-        const data = await getDashboardData();
-        if (isMounted) setStats(data);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
+        // 1) Stats principais
+        const dashboardStats = await getDashboardData();
+        if (!isMounted) return;
+
+        // defensivo: se o backend retornar algo inesperado, usamos 0 como fallback
+        setStats({
+          concluidas: Number(dashboardStats?.concluidas) || 0,
+          pendentes: Number(dashboardStats?.pendentes) || 0,
+          projetos: Number(dashboardStats?.projetos) || 0,
+        });
+
+        // 2) Relatório por semana (gera dados para gráfico de linha)
+        const result = await getRelatorioConcluidasPorSemana();
+
+        // Se resultado for nulo/errado, preserva vazio
+        if (!result || typeof result !== "object") {
+          setLineData([]);
+          return;
+        }
+
+        const parsed = {};
+
+        // result é um objeto: { "UsuárioA": { "21/08 - 27/08": [atividades], ... }, "Não atribuído": {...} }
+        Object.entries(result).forEach(([usuario, semanas]) => {
+          if (!semanas || typeof semanas !== "object") return;
+          Object.entries(semanas).forEach(([semana, atividades]) => {
+            if (!Array.isArray(atividades)) return;
+            if (!parsed[semana]) parsed[semana] = { semana, concluidas: 0, pendentes: 0 };
+
+            atividades.forEach((a) => {
+              if (!a) return;
+              const status = String(a.status || "").toLowerCase();
+              if (status === "finalizada" || status === "concluida" || status === "concluído") {
+                parsed[semana].concluidas += 1;
+              } else if (status === "pendente") {
+                parsed[semana].pendentes += 1;
+              }
+              // outros status são ignorados aqui (apenas contamos concluidas/pendentes)
+            });
+          });
+        });
+
+        // transformar em array e ordenar por data da semana (usa o dia inicial)
+        const sorted = Object.values(parsed).sort((a, b) => {
+          const parseStart = (intervalStr) => {
+            if (!intervalStr) return new Date(0);
+            const [start] = String(intervalStr).split(" - ");
+            const [d, m] = start.split("/").map(Number);
+            const year = new Date().getFullYear(); // toma o ano atual
+            return new Date(year, (m || 1) - 1, d || 1);
+          };
+          return parseStart(a.semana) - parseStart(b.semana);
+        });
+
+        if (isMounted) setLineData(sorted);
+      } catch (err) {
+        console.error("Erro ao buscar dados do dashboard:", err);
+        // mostre mensagem legível para o usuário
+        if (isMounted) setErrorMsg("Erro ao carregar dados. Verifique o servidor (console).");
       } finally {
         if (isMounted) setLoading(false);
       }
-    }
+    };
 
-    async function fetchLineData() {
-  try {
-    const result = await getRelatorioConcluidasPorSemana();
-    console.log("📊 Dados recebidos do backend:", result);
+    fetchDashboard();
 
-    if (isMounted) {
-      const parsed = {};
-
-      // percorre usuários
-      Object.values(result).forEach(userData => {
-        // percorre semanas
-        Object.entries(userData).forEach(([semana, atividades]) => {
-          if (!parsed[semana]) {
-            parsed[semana] = { semana, concluidas: 0, pendentes: 0 };
-          }
-
-          atividades.forEach(a => {
-  const status = a.status?.toLowerCase();
-
-  if (status === "finalizada") {
-    parsed[semana].concluidas += 1;
-  } else if (status === "pendente" || status === "pendentes") {
-    parsed[semana].pendentes += 1;
-  }
-});
-
-        });
-      });
-      // transforma objeto em array e ordena por data da semana
-const sorted = Object.values(parsed).sort((a, b) => {
-  const [diaA] = a.semana.split(" - ");
-  const [diaB] = b.semana.split(" - ");
-  const [dA, mA] = diaA.split("/").map(Number);
-  const [dB, mB] = diaB.split("/").map(Number);
-  return new Date(2025, mA - 1, dA) - new Date(2025, mB - 1, dB);
-});
-
-setLineData(sorted);
-    }
-  } catch (err) {
-    console.error("Erro ao buscar progresso semanal:", err);
-  }
-}
-
-    fetchData();
-    fetchLineData();
-
-    // 🔄 Auto refresh a cada 30s
-    const interval = setInterval(() => {
-      fetchData();
-      fetchLineData();
-    }, 30000);
+    // Atualiza automaticamente, e também ao mudar de rota (location)
+    const interval = setInterval(fetchDashboard, 30000);
 
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]); // reexecuta quando a rota muda (útil ao clicar no sidebar)
 
   if (loading) return <p className="text-gray-500 dark:text-gray-300">Carregando...</p>;
-  if (!stats) return <p className="text-red-500">Erro ao carregar dados.</p>;
+  if (errorMsg) return <p className="text-red-500">{errorMsg}</p>;
 
-  // Dados para gráfico de pizza
   const pieData = [
     { name: "Concluídas", value: stats.concluidas },
     { name: "Pendentes", value: stats.pendentes },
@@ -109,7 +121,7 @@ setLineData(sorted);
       </motion.h1>
       <p className="text-gray-600 dark:text-gray-400">Resumo atualizado das suas atividades e projetos.</p>
 
-      {/* Cards clicáveis */}
+      {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MotionCard
           onClick={() => navigate("/projetos")}
@@ -118,7 +130,6 @@ setLineData(sorted);
           title="Projetos Ativos"
           value={stats.projetos}
         />
-
         <MotionCard
           onClick={() => navigate("/atividades?status=concluidas")}
           icon={<CheckCircleIcon className="h-8 w-8" />}
@@ -126,7 +137,6 @@ setLineData(sorted);
           title="Atividades Concluídas"
           value={stats.concluidas}
         />
-
         <MotionCard
           onClick={() => navigate("/atividades?status=pendentes")}
           icon={<ClockIcon className="h-8 w-8" />}
@@ -167,17 +177,22 @@ setLineData(sorted);
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Progresso Semanal</h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={lineData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
-              <XAxis dataKey="semana" stroke="#888" />
-              <YAxis stroke="#888" />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="concluidas" stroke="#22c55e" strokeWidth={2} />
-              <Line type="monotone" dataKey="pendentes" stroke="#eab308" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+
+          {lineData.length === 0 ? (
+            <p className="text-gray-500">Nenhum dado semanal disponível.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={lineData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+                <XAxis dataKey="semana" stroke="#888" />
+                <YAxis stroke="#888" />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="concluidas" stroke="#22c55e" strokeWidth={2} />
+                <Line type="monotone" dataKey="pendentes" stroke="#eab308" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </motion.div>
       </div>
     </div>

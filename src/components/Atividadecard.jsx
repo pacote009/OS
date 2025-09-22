@@ -12,7 +12,7 @@ import { FaTrash, FaEdit, FaCheck, FaUserEdit, FaThumbtack } from "react-icons/f
 import { motion } from "framer-motion";
 
 const AtividadeCard = ({ atividade, onUpdate }) => {
-  const user = getCurrentUser();
+  const user = getCurrentUser() || { username: "Desconhecido", role: "user" };
   const [showFixarModal, setShowFixarModal] = useState(false);
   const [showAlterarModal, setShowAlterarModal] = useState(false);
   const [comentario, setComentario] = useState("");

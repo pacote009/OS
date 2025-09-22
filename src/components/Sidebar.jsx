@@ -11,9 +11,8 @@ import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
 
 export default function Sidebar({ onClose }) {
-
   const user = getCurrentUser();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "ADMIN"; // 🔹 padronizamos em maiúsculo
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
 
@@ -39,38 +38,59 @@ export default function Sidebar({ onClose }) {
     }
   };
 
-  const basePath = isAdmin ? "/admin" : "";
-
   return (
     <div className="flex flex-col justify-between min-h-full w-64 bg-gray-800 dark:bg-gray-900 text-white p-6 transition-colors">
-
-
       <div className="mb-10">
         <h2 className="text-2xl font-bold">Ativix</h2>
         <p className="text-gray-400 text-sm">Gestão de Chamados</p>
       </div>
       
       <nav className="space-y-2 flex-1">
-        <Link to={`${basePath}/projetos`} onClick={() => onClose && onClose()} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
-          <ClipboardDocumentListIcon className="h-5 w-5" /> 
-          <span>Projetos</span>
-        </Link>
-        <Link to={`${basePath}/atividades`} onClick={() => onClose && onClose()} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
-          <HomeIcon className="h-5 w-5" /> 
-          <span>Atividades</span>
-        </Link>
-        <Link to={`${basePath}/dashboard`} onClick={() => onClose && onClose()} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
+        {/* Dashboard */}
+        <Link 
+          to={isAdmin ? "/admin/dashboard" : "/dashboard"} 
+          onClick={() => onClose && onClose()} 
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all"
+        >
           <ChartBarIcon className="h-5 w-5" /> 
           <span>Dashboard</span>
         </Link>
 
+        {/* Projetos */}
+        <Link 
+          to={isAdmin ? "/admin/projetos" : "/projetos"} 
+          onClick={() => onClose && onClose()} 
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all"
+        >
+          <ClipboardDocumentListIcon className="h-5 w-5" /> 
+          <span>Projetos</span>
+        </Link>
+
+        {/* Atividades */}
+        <Link 
+          to={isAdmin ? "/admin/atividades" : "/atividades"} 
+          onClick={() => onClose && onClose()} 
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all"
+        >
+          <HomeIcon className="h-5 w-5" /> 
+          <span>Atividades</span>
+        </Link>
+
+        {/* Apenas Admin */}
         {isAdmin && (
           <>
-            <Link to="/admin/cadastro-usuario" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
+            <Link 
+              to="/admin/cadastro-usuario" 
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all"
+            >
               <UserCircleIcon className="h-5 w-5" /> 
               <span>Cadastro Usuário</span>
             </Link>
-            <Link to="/admin/relatorios" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all">
+
+            <Link 
+              to="/admin/relatorios" 
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all"
+            >
               <UserCircleIcon className="h-5 w-5" /> 
               <span>Relatórios</span>
             </Link>
@@ -88,7 +108,11 @@ export default function Sidebar({ onClose }) {
             onClick={toggleDarkMode}
             className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition"
           >
-            {darkMode ? <SunIcon className="h-5 w-5 text-yellow-400" /> : <MoonIcon className="h-5 w-5 text-gray-300" />}
+            {darkMode ? (
+              <SunIcon className="h-5 w-5 text-yellow-400" />
+            ) : (
+              <MoonIcon className="h-5 w-5 text-gray-300" />
+            )}
           </button>
         </div>
 

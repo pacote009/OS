@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../auth"; // agora só precisamos do login assíncrono
+import { login } from "../services/authService";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -10,23 +10,30 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (!username || !password) {
       setError("Preencha todos os campos!");
       return;
     }
 
-    // 🔹 Agora login é assíncrono
-    const user = await login(username, password);
+    try {
+      const data = await login(username, password);
 
-    if (user) {
-      if (user.role === "admin") {
-        navigate("/admin/dashboard"); // admin vai para painel
+      if (data && data.token) {
+        const user = data.user;
+
+        // 🔹 Corrigido: checagem lowercase e rota certa
+        if (user.role?.toLowerCase() === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/user/dashboard");
+        }
       } else {
-        navigate("/dashboard"); // user comum vai para painel simples
+        setError("Usuário ou senha inválidos!");
       }
-    } else {
-      setError("Usuário ou senha inválidos!");
+    } catch (err) {
+      setError(err.message || "Erro ao logar!");
     }
   };
 

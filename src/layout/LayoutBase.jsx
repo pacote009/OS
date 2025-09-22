@@ -42,7 +42,7 @@ const LayoutBase = ({ children }) => {
         <div className="max-w-7xl mx-auto w-full">
           {children}
         </div>
-      </main>
+      </div>
     </div>
   );
 };

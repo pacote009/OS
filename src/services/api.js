@@ -7,6 +7,15 @@ const api = axios.create({
   baseURL: BASE_URL,
 });
 
+// pegar token do localStorage e enviar no header
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 /**
  * Dashboard (dinâmico com projetos e atividades por usuário)
  */
@@ -23,8 +32,14 @@ export const getDashboardData = async () => {
     const users = Array.isArray(usersRes.data) ? usersRes.data : [];
 
     // Contagem de atividades por status
-    const concluidas = atividades.filter((a) => a.status === "finalizada").length;
-    const pendentes = atividades.filter((a) => a.status === "pendente").length;
+    const concluidas = atividades.filter(
+  (a) => ["finalizada", "concluida", "concluído"].includes(String(a.status).toLowerCase())
+).length;
+
+const pendentes = atividades.filter(
+  (a) => ["pendente"].includes(String(a.status).toLowerCase())
+).length;
+
 
     // Contagem total de projetos
     const totalProjetos = projetos.length;
@@ -72,13 +87,17 @@ export const getDashboardData = async () => {
   }
 };
 
-/**
- * Login (fake)
- */
+
 export const loginUser = async (username, password) => {
   const response = await api.get(`/users?username=${username}&password=${password}`);
   if (response.data.length > 0) {
-    return response.data[0];
+    const user = response.data[0];
+
+    // SALVAR TOKEN
+    localStorage.setItem("token", user.token || "fake-token"); // se tiver token do backend, use ele
+    localStorage.setItem("user", JSON.stringify(user));
+
+    return user;
   } else {
     throw new Error("Usuário ou senha inválidos!");
   }

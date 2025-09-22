@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast"; // <- Import do Toaster
+import { Toaster } from "react-hot-toast"; 
 import Login from "./pages/Login";
 import Dashboard from "./pages/DashBoard";
 import Projetos from "./pages/Projetos";
@@ -9,7 +9,7 @@ import CadastroUsuario from "./pages/CadastroUsuario";
 import Relatorios from "./pages/Relatorios";
 import ProtectedRoute from "./ProtectedRoute";
 import UserDashboard from "./pages/UserDashboard";
-import UserLayout from "./pages/UserLayout"; // novo layout para usuário comum
+import UserLayout from "./pages/UserLayout"; 
 
 export default function App() {
   return (
@@ -23,7 +23,7 @@ export default function App() {
 
         {/* Rotas do USUÁRIO COMUM */}
         <Route
-          path="/"
+          path="/user"
           element={
             <ProtectedRoute>
               <UserLayout />
@@ -39,7 +39,7 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute adminOnly>
               <Admin />
             </ProtectedRoute>
           }

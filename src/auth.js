@@ -1,26 +1,42 @@
 // src/auth.js
-import { loginUser } from "./services/api";
+export async function login(email, password) {
+  if (!email || !password) {
+    return { success: false, error: "Email e senha são obrigatórios" };
+  }
 
-export async function login(username, password) {
   try {
-    const user = await loginUser(username, password);
+    const response = await fetch("http://localhost:5000/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-    if (user) {
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      return user;
+    const data = await response.json();
+
+    if (response.ok) {
+      // Armazena token e usuário no localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      return { success: true, user: data.user };
+    } else {
+      return { success: false, error: data.error || "Erro no login" };
     }
-    return null;
   } catch (error) {
-    console.error("Erro no login:", error.message);
-    return null;
+    console.error("Erro de rede ou servidor:", error);
+    return { success: false, error: "Erro de conexão" };
   }
 }
 
 export function logout() {
-  localStorage.removeItem("currentUser");
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
 }
 
-export function getCurrentUser() {
-  const user = localStorage.getItem("currentUser");
+export const getCurrentUser = () => {
+  const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
-}
+};
+
+export const getToken = () => localStorage.getItem("token");

@@ -1,15 +1,18 @@
-// ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
-import { getCurrentUser } from "./auth";
 
-const ProtectedRoute = ({ children }) => {
-  const user = getCurrentUser();
+const ProtectedRoute = ({ children, adminOnly = false }) => {
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  if (!user) {
-    return <Navigate to="/" replace />; // Se não está logado -> login
+  if (!token || !user) {
+    return <Navigate to="/" replace />;
   }
 
-  return children; // Se está logado -> entra normalmente
+  if (adminOnly && user.role !== "ADMIN") {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;
