@@ -1,12 +1,64 @@
-# React + Vite
+# 📋 Sistema de Ordens de Serviço (OS)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicativo web para gerenciamento de Ordens de Serviço (OS).  
+Permite cadastro de usuários, registro de serviços, acompanhamento de status e relatórios.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Tecnologias
+- [React](https://react.dev/)
+- [Vite](https://vitejs.dev/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [ESLint](https://eslint.org/)
+- [JSON Server](https://github.com/typicode/json-server) (simulação de backend)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 📂 Estrutura de Pastas
+OS/
+
+├── public/ # Arquivos estáticos
+
+├── src/ # Código fonte principal
+
+│ ├── assets/ # Imagens, ícones, fontes
+
+│ ├── components/ # Componentes reutilizáveis
+
+│ ├── pages/ # Páginas (rotas principais)
+
+│ ├── services/ # Comunicação com APIs / backend
+
+│ ├── hooks/ # Hooks customizados
+
+│ ├── utils/ # Funções auxiliares
+
+│ └── App.jsx # Componente raiz
+
+├── db.json # Banco de dados fake (JSON Server)
+
+├── package.json
+
+└── vite.config.js
+
+
+
+---
+
+## 🔧 Como rodar localmente
+
+```bash
+# Clone o repositório
+git clone https://github.com/pacote009/OS.git
+
+# Entre na pasta
+cd OS
+
+# Instale as dependências
+npm install
+
+# Rode o frontend
+npm run dev
+
+# Em outro terminal, rode o backend fake
+npx json-server --watch db.json --port 3001
