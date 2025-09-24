@@ -48,7 +48,7 @@ export default function Sidebar({ onClose }) {
       <nav className="space-y-2 flex-1">
         {/* Dashboard */}
         <Link 
-          to={isAdmin ? "/admin/dashboard" : "/dashboard"} 
+          to={isAdmin ? "/admin/dashboard" : "/user/dashboard"} 
           onClick={() => onClose && onClose()} 
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all"
         >
@@ -58,7 +58,7 @@ export default function Sidebar({ onClose }) {
 
         {/* Projetos */}
         <Link 
-          to={isAdmin ? "/admin/projetos" : "/projetos"} 
+          to={isAdmin ? "/admin/projetos" : "/user/projetos"} 
           onClick={() => onClose && onClose()} 
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all"
         >
@@ -68,7 +68,7 @@ export default function Sidebar({ onClose }) {
 
         {/* Atividades */}
         <Link 
-          to={isAdmin ? "/admin/atividades" : "/atividades"} 
+          to={isAdmin ? "/admin/atividades" : "/user/atividades"} 
           onClick={() => onClose && onClose()} 
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-all"
         >

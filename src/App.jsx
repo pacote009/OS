@@ -18,39 +18,57 @@ export default function App() {
       <Toaster position="top-right" reverseOrder={false} />
 
       <Routes>
-        {/* Login */}
-        <Route path="/" element={<Login />} />
+  {/* Login */}
+  <Route path="/" element={<Login />} />
 
-        {/* Rotas do USUÁRIO COMUM */}
-        <Route
-          path="/user"
-          element={
-            <ProtectedRoute>
-              <UserLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="dashboard" element={<UserDashboard />} />
-          <Route path="projetos" element={<Projetos />} />
-          <Route path="atividades" element={<Atividades />} />
-        </Route>
+  {/* Rotas globais (user/admin) */}
+  <Route
+    path="/projetos"
+    element={
+      <ProtectedRoute>
+        <Projetos />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/atividades"
+    element={
+      <ProtectedRoute>
+        <Atividades />
+      </ProtectedRoute>
+    }
+  />
 
-        {/* Rotas do ADMIN */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute adminOnly>
-              <Admin />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="projetos" element={<Projetos />} />
-          <Route path="atividades" element={<Atividades />} />
-          <Route path="cadastro-usuario" element={<CadastroUsuario />} />
-          <Route path="relatorios" element={<Relatorios />} />
-        </Route>
-      </Routes>
+  {/* Rotas do USUÁRIO COMUM */}
+  <Route
+    path="/user"
+    element={
+      <ProtectedRoute>
+        <UserLayout />
+      </ProtectedRoute>
+    }
+  >
+    <Route path="dashboard" element={<UserDashboard />} />
+    <Route path="projetos" element={<Projetos />} />
+    <Route path="atividades" element={<Atividades />} />
+  </Route>
+
+  {/* Rotas do ADMIN */}
+  <Route
+    path="/admin"
+    element={
+      <ProtectedRoute adminOnly>
+        <Admin />
+      </ProtectedRoute>
+    }
+  >
+    <Route path="dashboard" element={<Dashboard />} />
+    <Route path="projetos" element={<Projetos />} />
+    <Route path="atividades" element={<Atividades />} />
+    <Route path="cadastro-usuario" element={<CadastroUsuario />} />
+    <Route path="relatorios" element={<Relatorios />} />
+  </Route>
+</Routes>
     </div>
   );
 }

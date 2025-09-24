@@ -124,21 +124,21 @@ const Dashboard = () => {
       {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MotionCard
-          onClick={() => navigate("/projetos")}
+          onClick={() => navigate("/admin/projetos")}
           icon={<ClipboardDocumentListIcon className="h-8 w-8" />}
           color="indigo"
           title="Projetos Ativos"
           value={stats.projetos}
         />
         <MotionCard
-          onClick={() => navigate("/atividades?status=concluidas")}
+          onClick={() => navigate("/admin/atividades?status=concluidas")}
           icon={<CheckCircleIcon className="h-8 w-8" />}
           color="green"
           title="Atividades Concluídas"
           value={stats.concluidas}
         />
         <MotionCard
-          onClick={() => navigate("/atividades?status=pendentes")}
+          onClick={() => navigate("/admin/atividades?status=pendentes")}
           icon={<ClockIcon className="h-8 w-8" />}
           color="yellow"
           title="Pendentes"
